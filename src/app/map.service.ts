@@ -17,6 +17,10 @@ export class MapService {
   httpOptions: any;
   urlParams: string;
   nodesArr: L.LatLngExpression[];
+  latitude_original: any;
+  longitude_original: any;
+  latitude_destination: any;
+  longitude_destination: any;
 
   constructor(private http: HttpClient) {
     this.pointscount = 0;
@@ -109,12 +113,17 @@ export class MapService {
 
     if (this.pointscount < 2) {
       if (this.pointscount === 0) {
-        this.coordinatesPath = new OriginDestPoints();
-        this.coordinatesPath.latitude_original = e.latlng.lat;
-        this.coordinatesPath.longitude_original = e.latlng.lat;
-      } else {
-        this.coordinatesPath.latitude_destination = e.latlng.lat;
-        this.coordinatesPath.longitude_destination = e.latlng.lat;
+        // this.coordinatesPath = new OriginDestPoints();
+        // this.coordinatesPath.latitude_original = e.latlng.lat;
+        // this.coordinatesPath.longitude_original = e.latlng.lat;
+        this.latitude_original = e.latlng.lat;
+        this.longitude_original = e.latlng.lng;
+        console.log("save origin point");
+      }
+      if (this.pointscount === 1) {
+        this.latitude_destination = e.latlng.lat;
+        this.longitude_destination = e.latlng.lng;
+        console.log("save destination point");
       }
       this.pointscount = this.pointscount + 1;
 
@@ -127,12 +136,15 @@ export class MapService {
         })
         .addTo(this.map)
         .openPopup();
-      marker.on("click", () => marker.remove());
+      marker.on("click", () => {
+        this.pointscount = this.pointscount - 1;
+        marker.remove();
+      });
     }
     if (this.pointscount === 2) {
       // build path
 
-      this.getPath(this.coordinatesPath).subscribe(data => {
+      this.getPath().subscribe(data => {
         this.convertToArray(data);
         this.routes.Init = L.polyline(this.nodesArr, { color: "red" }).addTo(this.map);
       });
@@ -169,17 +181,22 @@ export class MapService {
     }).addTo(this.map);
   }
 
-  getPath( coordinates: OriginDestPoints ) {
+  getPath() {
     // this.httpOptions = {
     //     params: new HttpParams().set("longitude_original", coordinates.longitude_original.toString())
     //     .set("latitude_original", coordinates.latitude_original.toString())
     //     .set("longitude_destination", coordinates.longitude_destination.toString())
     //     .set("latitude_destination", coordinates.latitude_destination.toString())
     //   };
-    this.urlParams = "?longitude_original=" + coordinates.longitude_original.toString();
-    this.urlParams += "&latitude_original=" + coordinates.latitude_original.toString();
-    this.urlParams += "&longitude_destination=", coordinates.longitude_destination.toString();
-    this.urlParams += "&latitude_destination=", coordinates.latitude_destination.toString();
+    this.urlParams = "?longitude_original=" + this.longitude_original.toString();
+    this.urlParams += "&latitude_original=" + this.latitude_original.toString();
+    this.urlParams += "&longitude_destination=" + this.longitude_destination.toString();
+    this.urlParams += "&latitude_destination=" + this.latitude_destination.toString();
+
+    console.log(this.longitude_original.toString());
+    console.log(this.latitude_original.toString());
+    console.log(this.longitude_destination.toString());
+    console.log(this.latitude_destination.toString());
     return this.http.get<MyNode>("http://127.0.0.1:8000/path" + this.urlParams);
   }
 
