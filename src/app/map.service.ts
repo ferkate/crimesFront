@@ -144,16 +144,16 @@ export class MapService {
     if (this.pointscount === 2) {
       // build path
 
-      this.getPath().subscribe(data => {
-        this.convertToArray(data);
-        this.routes.Init = L.polyline(this.nodesArr, { color: "red" }).addTo(this.map);
-      });
-
-      // this.getJSON().subscribe(data => {
-      //   // console.log(data);
+      // this.getPath().subscribe(data => {
       //   this.convertToArray(data);
       //   this.routes.Init = L.polyline(this.nodesArr, { color: "red" }).addTo(this.map);
       // });
+
+      this.getJSON().subscribe(data => {
+        // console.log(data);
+        this.convertToArray(data);
+        this.routes.Init = L.polyline(this.nodesArr, { color: "red" }).addTo(this.map);
+      });
     }
   }
 
@@ -181,7 +181,7 @@ export class MapService {
     }).addTo(this.map);
   }
 
-  getPath() {
+  getPath(): Observable<MyNode> {
     // this.httpOptions = {
     //     params: new HttpParams().set("longitude_original", coordinates.longitude_original.toString())
     //     .set("latitude_original", coordinates.latitude_original.toString())
@@ -201,7 +201,7 @@ export class MapService {
   }
 
   getJSON(): Observable<MyNode> {
-    return this.http.get<MyNode>("./assets/response.json");
+    return this.http.get<MyNode>("./assets/response2.json");
   }
 
   convertToArray(node: MyNode) {
@@ -210,7 +210,7 @@ export class MapService {
       let row: L.LatLngExpression = new L.LatLng(node.nodes[i].y, node.nodes[i].x);
       this.nodesArr.push(row);
     }
-    // console.log(this.nodesArr);
+    console.log(this.nodesArr);
   }
 
 }
